@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
 import { useMutation, gql } from '@apollo/client';
-import { AUTH_TOKEN } from '../constants';
 import { useAuth } from '../context/AuthContext';
 
 const SIGNUP_MUTATION = gql`
