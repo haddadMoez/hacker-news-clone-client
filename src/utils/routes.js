@@ -1,6 +1,7 @@
-import Login from '../components/Login';
-import LinkList from '../components/LinkList';
-import CreateLink from '../components/CreateLink';
+import { lazy } from 'react';
+const Login = lazy(() => import('../components/Login'));
+const LinkList = lazy(() => import('../components/LinkList'));
+const CreateLink = lazy(() => import('../components/CreateLink'));
 
 const routes = [
   {
