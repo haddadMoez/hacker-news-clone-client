@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { useQuery, gql } from '@apollo/client';
 import Link from './Link';
+import { getSession } from '../utils/session';
 
 const FEED_QUERY = gql`
   {

@@ -4,10 +4,12 @@ import { Link } from 'react-router-dom';
 import _ from 'lodash';
 
 import { useAuth } from '../context/AuthContext';
+import { destroySession } from '../utils/session';
 
 const Header = () => {
   const history = useHistory();
-  const { auth, setAuth } = useAuth();
+  const auth = useAuth();
+
   return (
     <div className="flex pa1 justify-between nowrap orange">
       <div className="flex flex-fixed black">
@@ -37,8 +39,8 @@ const Header = () => {
           <div
             className="ml1 pointer black"
             onClick={() => {
-              setAuth({ user: null, token: null });
-              history.push(`/`);
+              destroySession();
+              history.push('/login');
             }}
           >
             logout

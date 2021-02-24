@@ -5,6 +5,7 @@ import './styles/index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { REACT_APP_HTTP_LINK } from './constants';
+import { AuthProvider } from './context/AuthContext';
 
 import {
   ApolloProvider,
@@ -25,7 +26,9 @@ const client = new ApolloClient({
 ReactDOM.render(
   <BrowserRouter>
     <ApolloProvider client={client}>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </ApolloProvider>
   </BrowserRouter>,
   document.getElementById('root')

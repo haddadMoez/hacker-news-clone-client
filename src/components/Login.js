@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
 import { useMutation, gql } from '@apollo/client';
-import { useAuth } from '../context/AuthContext';
+import { setSession } from '../utils/session';
 
 const SIGNUP_MUTATION = gql`
   mutation SignupMutation($email: String!, $password: String!, $name: String!) {
@@ -25,7 +25,6 @@ const LOGIN_MUTATION = gql`
 `;
 
 const Login = () => {
-  const { setAuth } = useAuth();
   const history = useHistory();
   const [formState, setFormState] = useState({
     login: true,
@@ -40,7 +39,7 @@ const Login = () => {
       password: formState.password,
     },
     onCompleted: ({ signin }) => {
-      setAuth({ user: signin.user, token: signin.token });
+      setSession({ user: signin.user, token: signin.token });
       history.push('/');
     },
   });
