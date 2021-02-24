@@ -1,11 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { setContext } from '@apollo/client/link/context';
+import _ from 'lodash';
 import './styles/index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { REACT_APP_HTTP_LINK } from './constants';
 import { AuthProvider } from './context/AuthContext';
+import { useSession } from './utils/session';
 
 import {
   ApolloProvider,
@@ -18,8 +21,19 @@ const httpLink = createHttpLink({
   uri: REACT_APP_HTTP_LINK,
 });
 
+const authLink = setContext((parent, { headers }) => {
+  const session = useSession();
+  return {
+    headers: {
+      ...headers,
+      authorization: _.get(session, 'token', null),
+      user: _.get(session, 'user.id', null),
+    },
+  };
+});
+
 const client = new ApolloClient({
-  link: httpLink,
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
