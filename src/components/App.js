@@ -2,8 +2,10 @@ import React, { Suspense, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import Loader from 'react-loader';
 import _ from 'lodash';
-import routes from '../utils/routes';
+import { ROUTES } from '../constants/routes';
 const Header = lazy(() => import('./Header'));
+const NoMatch = lazy(() => import('./NoMatch'));
+const CustomRoute = lazy(() => import('./Route'));
 
 const App = () => {
   return (
@@ -12,14 +14,15 @@ const App = () => {
         <Header />
         <div className="ph3 pv1 background-gray">
           <Switch>
-            {_.map(routes, (route) => (
-              <Route
+            {_.map(ROUTES, (route) => (
+              <CustomRoute
                 exact
-                key={route.path}
+                type={route.type}
                 path={route.path}
                 component={route.component}
               />
             ))}
+            <Route path="*" component={NoMatch} />
           </Switch>
         </div>
       </div>

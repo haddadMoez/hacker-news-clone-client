@@ -1,5 +1,4 @@
 import Cookies from 'universal-cookie';
-import _ from 'lodash';
 import { AUTH_TOKEN } from '../constants';
 const cookies = new Cookies();
 
