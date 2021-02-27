@@ -27,7 +27,6 @@ const authLink = setContext((parent, { headers }) => {
     headers: {
       ...headers,
       authorization: _.get(session, 'token', null),
-      user: _.get(session, 'user.id', null),
     },
   };
 });

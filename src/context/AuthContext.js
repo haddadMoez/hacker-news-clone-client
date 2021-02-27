@@ -4,8 +4,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 
 import { useSession, destroySession } from '../utils/session';
-import { jwtExpirationCheck } from '../utils/jwtExpirationCheck';
-import { AUTH_TOKEN } from '../constants';
+import { isValidToken } from '../utils/token-validation';
 
 const AuthContext = createContext({
   auth: {
@@ -25,10 +24,7 @@ const AuthProvider = ({ children }) => {
   });
 
   const isAuthenticated = () => {
-    if (
-      _.isEmpty(session) ||
-      jwtExpirationCheck(AUTH_TOKEN, _.get(session, 'token'))
-    ) {
+    if (_.isEmpty(session) || !isValidToken(_.get(session, 'token', null))) {
       setAuth({ user: null, token: null });
       destroySession();
     } else {
