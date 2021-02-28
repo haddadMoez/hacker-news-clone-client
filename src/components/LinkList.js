@@ -13,6 +13,10 @@ const FEED_QUERY = gql`
         createdAt
         url
         description
+        postedBy {
+          name
+        }
+        votes
       }
     }
   }
@@ -25,7 +29,9 @@ const LinkList = () => {
       {loading && <p>Loading...</p>}
       {error && <pre>{JSON.stringify(error, null, 2)}</pre>}
       {data &&
-        _.map(data.feed.links, (link) => <Link key={link.id} link={link} />)}
+        _.map(data.feed.links, (link, index) => (
+          <Link key={link.id} link={link} index={index} />
+        ))}
     </>
   );
 };
