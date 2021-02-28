@@ -1,11 +1,26 @@
 import React from 'react';
 import _ from 'lodash';
+import { useMutation, gql } from '@apollo/client';
 
 import { useAuth } from '../context/AuthContext';
 import { timeDifferenceForDate } from '../utils/time-difference';
 
+const VOTE_MUTATION = gql`
+  mutation VoteMutation($linkId: ID!) {
+    vote(linkId: $linkId) {
+      id
+      votes
+    }
+  }
+`;
+
 const Link = ({ link, index }) => {
   const auth = useAuth();
+  const [vote] = useMutation(VOTE_MUTATION, {
+    variables: {
+      linkId: link.id,
+    },
+  });
   return (
     <div className="flex mt2 items-start">
       <div className="flex items-center">
@@ -14,7 +29,7 @@ const Link = ({ link, index }) => {
           <div
             className="ml1 gray f11"
             style={{ cursor: 'pointer' }}
-            // onClick={vote}
+            onClick={vote}
           >
             ▲
           </div>
