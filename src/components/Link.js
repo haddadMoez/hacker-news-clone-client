@@ -29,7 +29,7 @@ const Link = ({ link, index }) => {
       const updatedLinks = _.map(feed.links, (feedLink) => {
         if (feedLink.id === link.id) {
           let votesClone = _.clone(feedLink.votes);
-          votesClone = _.union([vote.user], votesClone);
+          votesClone = _.union(vote.user.split(), votesClone);
           return {
             ...feedLink,
             votes: votesClone,
