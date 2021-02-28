@@ -4,12 +4,13 @@ import { useMutation, gql } from '@apollo/client';
 
 import { useAuth } from '../context/AuthContext';
 import { timeDifferenceForDate } from '../utils/time-difference';
+import { FEED_QUERY } from './LinkList';
 
 const VOTE_MUTATION = gql`
   mutation VoteMutation($linkId: ID!) {
     vote(linkId: $linkId) {
-      id
-      votes
+      link
+      user
     }
   }
 `;
@@ -19,6 +20,32 @@ const Link = ({ link, index }) => {
   const [vote] = useMutation(VOTE_MUTATION, {
     variables: {
       linkId: link.id,
+    },
+    update(cache, { data: { vote } }) {
+      const { feed } = cache.readQuery({
+        query: FEED_QUERY,
+      });
+
+      const updatedLinks = _.map(feed.links, (feedLink) => {
+        if (feedLink.id === link.id) {
+          let votesClone = _.clone(feedLink.votes);
+          votesClone = _.union([vote.user], votesClone);
+          return {
+            ...feedLink,
+            votes: votesClone,
+          };
+        }
+        return feedLink;
+      });
+
+      cache.writeQuery({
+        query: FEED_QUERY,
+        data: {
+          feed: {
+            links: updatedLinks,
+          },
+        },
+      });
     },
   });
   return (
