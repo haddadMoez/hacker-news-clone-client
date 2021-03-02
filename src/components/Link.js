@@ -1,19 +1,11 @@
 import React from 'react';
 import _ from 'lodash';
-import { useMutation, gql } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 
 import { useAuth } from '../context/AuthContext';
 import { timeDifferenceForDate } from '../utils/time-difference';
-import { FEED_QUERY } from './LinkList';
-
-const VOTE_MUTATION = gql`
-  mutation VoteMutation($linkId: ID!) {
-    vote(linkId: $linkId) {
-      link
-      user
-    }
-  }
-`;
+import { FEED_QUERY } from '../constants/queries';
+import { VOTE_MUTATION } from '../constants/mutations';
 
 const Link = ({ link, index }) => {
   const auth = useAuth();

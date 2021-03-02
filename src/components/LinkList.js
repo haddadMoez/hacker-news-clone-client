@@ -1,25 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import Link from './Link';
-
-export const FEED_QUERY = gql`
-  {
-    feed {
-      id
-      links {
-        id
-        createdAt
-        url
-        description
-        postedBy {
-          name
-        }
-        votes
-      }
-    }
-  }
-`;
+import { FEED_QUERY } from '../constants/queries';
 
 const LinkList = () => {
   const { data, loading, error } = useQuery(FEED_QUERY);
