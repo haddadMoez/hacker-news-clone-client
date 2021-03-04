@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
 import { useMutation } from '@apollo/client';
+import Loader from 'react-loader';
+
 import { setSession } from '../utils/session';
 import { SIGNUP_MUTATION, LOGIN_MUTATION } from '../constants/mutations';
 
@@ -12,8 +14,9 @@ const Login = () => {
     password: '',
     name: '',
   });
+  const [error, setError] = useState(null);
 
-  const [login] = useMutation(LOGIN_MUTATION, {
+  const [login, { loading: loginLoading }] = useMutation(LOGIN_MUTATION, {
     variables: {
       email: formState.email,
       password: formState.password,
@@ -22,9 +25,17 @@ const Login = () => {
       setSession({ user: signin.user, token: signin.token });
       history.push('/');
     },
+    onError: ({ graphQLErrors, networkError }) => {
+      if (graphQLErrors)
+        graphQLErrors.forEach(({ message, locations, path }) =>
+          setError(message)
+        );
+
+      if (networkError) setError(networkError);
+    },
   });
 
-  const [signup] = useMutation(SIGNUP_MUTATION, {
+  const [signup, { loading: signupLoading }] = useMutation(SIGNUP_MUTATION, {
     variables: {
       name: formState.name,
       email: formState.email,
@@ -33,70 +44,82 @@ const Login = () => {
     onCompleted: ({ signup }) => {
       history.push('/');
     },
+    onError: ({ graphQLErrors, networkError }) => {
+      if (graphQLErrors)
+        graphQLErrors.forEach(({ message, locations, path }) =>
+          setError(message)
+        );
+
+      if (networkError) setError(networkError);
+    },
   });
 
   return (
-    <div>
-      <h4 className="mv3">{formState.login ? 'Login' : 'Sign Up'}</h4>
-      <div className="flex flex-column">
-        {!formState.login && (
+    <>
+      {error && <pre>{error}</pre>}
+      <div>
+        {(signupLoading || loginLoading) && <Loader />}
+        <h4 className="mv3">{formState.login ? 'Login' : 'Sign Up'}</h4>
+        <div className="flex flex-column">
+          {!formState.login && (
+            <input
+              value={formState.name}
+              onChange={(e) =>
+                setFormState({
+                  ...formState,
+                  name: e.target.value,
+                })
+              }
+              type="text"
+              placeholder="Your name"
+            />
+          )}
           <input
-            value={formState.name}
+            value={formState.email}
             onChange={(e) =>
               setFormState({
                 ...formState,
-                name: e.target.value,
+                email: e.target.value,
               })
             }
             type="text"
-            placeholder="Your name"
+            placeholder="Your email address"
           />
-        )}
-        <input
-          value={formState.email}
-          onChange={(e) =>
-            setFormState({
-              ...formState,
-              email: e.target.value,
-            })
-          }
-          type="text"
-          placeholder="Your email address"
-        />
-        <input
-          value={formState.password}
-          onChange={(e) =>
-            setFormState({
-              ...formState,
-              password: e.target.value,
-            })
-          }
-          type="password"
-          placeholder="Choose a safe password"
-        />
+          <input
+            value={formState.password}
+            onChange={(e) =>
+              setFormState({
+                ...formState,
+                password: e.target.value,
+              })
+            }
+            type="password"
+            placeholder="Choose a safe password"
+          />
+        </div>
+        <div className="flex mt3">
+          <button
+            className="pointer mr2 button"
+            onClick={formState.login ? login : signup}
+          >
+            {formState.login ? 'login' : 'create account'}
+          </button>
+          <button
+            className="pointer button"
+            onClick={(e) =>
+              setFormState({
+                ...formState,
+                login: !formState.login,
+              })
+            }
+          >
+            {formState.login
+              ? 'need to create an account?'
+              : 'already have an account?'}
+          </button>
+        </div>
       </div>
-      <div className="flex mt3">
-        <button
-          className="pointer mr2 button"
-          onClick={formState.login ? login : signup}
-        >
-          {formState.login ? 'login' : 'create account'}
-        </button>
-        <button
-          className="pointer button"
-          onClick={(e) =>
-            setFormState({
-              ...formState,
-              login: !formState.login,
-            })
-          }
-        >
-          {formState.login
-            ? 'need to create an account?'
-            : 'already have an account?'}
-        </button>
-      </div>
-    </div>
+    </>
   );
 };
 

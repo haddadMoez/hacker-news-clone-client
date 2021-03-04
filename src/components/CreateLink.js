@@ -1,29 +1,20 @@
 import React, { useState } from 'react';
-import { useMutation, gql } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useHistory } from 'react-router';
+import Loader from 'react-loader';
 
 import { FEED_QUERY } from '../constants/queries';
-
-const CREATE_LINK_MUTATION = gql`
-  mutation PostMutation($description: String!, $url: String!) {
-    post(description: $description, url: $url) {
-      id
-      createdAt
-      url
-      description
-    }
-  }
-`;
+import { CREATE_LINK_MUTATION } from '../constants/mutations';
 
 const CreateLink = () => {
   const history = useHistory();
-
+  const [error, setError] = useState(null);
   const [formState, setFormState] = useState({
     description: '',
     url: '',
   });
 
-  const [createLink] = useMutation(CREATE_LINK_MUTATION, {
+  const [createLink, { loading }] = useMutation(CREATE_LINK_MUTATION, {
     variables: {
       description: formState.description,
       url: formState.url,
@@ -42,44 +33,57 @@ const CreateLink = () => {
       });
     },
     onCompleted: () => history.push('/'),
+    onError: ({ graphQLErrors, networkError }) => {
+      if (graphQLErrors)
+        graphQLErrors.forEach(({ message, locations, path }) =>
+          setError(message)
+        );
+
+      if (networkError) setError(networkError);
+    },
   });
+
   return (
-    <div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          createLink();
-        }}
-      >
-        <div className="flex flex-column mt3">
-          <input
-            className="mb2"
-            value={formState.description}
-            onChange={(e) =>
-              setFormState({
-                ...formState,
-                description: e.target.value,
-              })
-            }
-            type="text"
-            placeholder="A description for the link"
-          />
-          <input
-            className="mb2"
-            value={formState.url}
-            onChange={(e) =>
-              setFormState({
-                ...formState,
-                url: e.target.value,
-              })
-            }
-            type="text"
-            placeholder="The URL for the link"
-          />
-        </div>
-        <button type="submit">Submit</button>
-      </form>
-    </div>
+    <>
+      {error && <pre>{error}</pre>}
+      <div>
+        {loading && <Loader />}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            createLink();
+          }}
+        >
+          <div className="flex flex-column mt3">
+            <input
+              className="mb2"
+              value={formState.description}
+              onChange={(e) =>
+                setFormState({
+                  ...formState,
+                  description: e.target.value,
+                })
+              }
+              type="text"
+              placeholder="A description for the link"
+            />
+            <input
+              className="mb2"
+              value={formState.url}
+              onChange={(e) =>
+                setFormState({
+                  ...formState,
+                  url: e.target.value,
+                })
+              }
+              type="text"
+              placeholder="The URL for the link"
+            />
+          </div>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </>
   );
 };
 
