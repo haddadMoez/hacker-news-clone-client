@@ -21,10 +21,6 @@ const Header = () => {
         <Link to="/top" className="ml1 no-underline black">
           top
         </Link>
-        <div className="ml1">|</div>
-        <Link to="/search" className="ml1 no-underline black">
-          search
-        </Link>
         {!_.isEmpty(auth.token) && (
           <div className="flex">
             <div className="ml1">|</div>
