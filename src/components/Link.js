@@ -8,7 +8,7 @@ import { timeDifferenceForDate } from '../utils/time-difference';
 import { FEED_QUERY } from '../constants/queries';
 import { VOTE_MUTATION } from '../constants/mutations';
 
-const Link = ({ link, index }) => {
+const Link = ({ link, index, skip, limit, sort }) => {
   const auth = useAuth();
   const [error, setError] = useState(null);
   const [vote, { loading }] = useMutation(VOTE_MUTATION, {
@@ -18,6 +18,11 @@ const Link = ({ link, index }) => {
     update(cache, { data: { vote } }) {
       const { feed } = cache.readQuery({
         query: FEED_QUERY,
+        variables: {
+          limit,
+          skip,
+          sort,
+        },
       });
 
       const updatedLinks = _.map(feed.links, (feedLink) => {
@@ -38,6 +43,11 @@ const Link = ({ link, index }) => {
           feed: {
             links: updatedLinks,
           },
+        },
+        variables: {
+          limit,
+          skip,
+          sort,
         },
       });
     },

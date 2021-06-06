@@ -5,6 +5,7 @@ import Loader from 'react-loader';
 
 import { FEED_QUERY } from '../constants/queries';
 import { CREATE_LINK_MUTATION } from '../constants/mutations';
+import { LINKS_PER_PAGE } from '../constants';
 
 const CreateLink = () => {
   const history = useHistory();
@@ -20,8 +21,16 @@ const CreateLink = () => {
       url: formState.url,
     },
     update(cache, { data: { post } }) {
+      const limit = LINKS_PER_PAGE;
+      const skip = 0;
+      const sort = { createdAt: 'desc' };
       const { feed } = cache.readQuery({
         query: FEED_QUERY,
+        variables: {
+          limit,
+          skip,
+          sort,
+        },
       });
       cache.writeQuery({
         query: FEED_QUERY,
@@ -30,9 +39,14 @@ const CreateLink = () => {
             links: [post, ...feed.links],
           },
         },
+        variables: {
+          limit,
+          skip,
+          sort,
+        },
       });
     },
-    onCompleted: () => history.push('/'),
+    onCompleted: () => history.push('/feed/1'),
     onError: ({ graphQLErrors, networkError }) => {
       if (graphQLErrors)
         graphQLErrors.forEach(({ message, locations, path }) =>

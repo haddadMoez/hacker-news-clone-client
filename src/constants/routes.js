@@ -11,7 +11,12 @@ const ROUTE_TYPES = {
 
 const ROUTES = [
   {
-    path: '/',
+    path: '/feed/:page',
+    component: LinkList,
+    type: ROUTE_TYPES.PUBLIC,
+  },
+  {
+    path: '/top',
     component: LinkList,
     type: ROUTE_TYPES.PUBLIC,
   },
@@ -25,6 +30,11 @@ const ROUTES = [
     component: CreateLink,
     type: ROUTE_TYPES.PRIVATE,
   },
+  // {
+  //   path: '/',
+  //   component: LinkList,
+  //   type: ROUTE_TYPES.PUBLIC,
+  // },
 ];
 
 export { ROUTES, ROUTE_TYPES };

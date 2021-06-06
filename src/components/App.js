@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Redirect, Switch, Route } from 'react-router-dom';
 import Loader from 'react-loader';
 import _ from 'lodash';
 import { ROUTES } from '../constants/routes';
@@ -22,6 +22,7 @@ const App = () => {
                 component={route.component}
               />
             ))}
+            <Route exact path="/" render={() => <Redirect to="/feed/1" />} />
             <Route path="*" component={NoMatch} />
           </Switch>
         </div>
