@@ -2,6 +2,7 @@ import { lazy } from 'react';
 const Login = lazy(() => import('../components/Login'));
 const LinkList = lazy(() => import('../components/LinkList'));
 const CreateLink = lazy(() => import('../components/CreateLink'));
+const Search = lazy(() => import('../components/Search'));
 
 const ROUTE_TYPES = {
   LOGIN: 'LOGIN',
@@ -16,8 +17,8 @@ const ROUTES = [
     type: ROUTE_TYPES.PUBLIC,
   },
   {
-    path: '/top',
-    component: LinkList,
+    path: '/search',
+    component: Search,
     type: ROUTE_TYPES.PUBLIC,
   },
   {
@@ -30,11 +31,6 @@ const ROUTES = [
     component: CreateLink,
     type: ROUTE_TYPES.PRIVATE,
   },
-  // {
-  //   path: '/',
-  //   component: LinkList,
-  //   type: ROUTE_TYPES.PUBLIC,
-  // },
 ];
 
 export { ROUTES, ROUTE_TYPES };
