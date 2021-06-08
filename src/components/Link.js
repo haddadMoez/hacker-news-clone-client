@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import _ from 'lodash';
 import { useMutation } from '@apollo/client';
 import Loader from 'react-loader';
@@ -7,49 +7,55 @@ import { useAuth } from '../context/AuthContext';
 import { timeDifferenceForDate } from '../utils/time-difference';
 import { FEED_QUERY } from '../constants/queries';
 import { VOTE_MUTATION } from '../constants/mutations';
+import PaginationContext from './pagination';
 
-const Link = ({ link, index, skip, limit, sort }) => {
+const Link = ({ link, index, search }) => {
   const auth = useAuth();
   const [error, setError] = useState(null);
+  const { pagination } = useContext(PaginationContext);
+  const { skip, limit, sort } = pagination;
+
   const [vote, { loading }] = useMutation(VOTE_MUTATION, {
     variables: {
       linkId: link.id,
     },
     update(cache, { data: { vote } }) {
-      const { feed } = cache.readQuery({
-        query: FEED_QUERY,
-        variables: {
-          limit,
-          skip,
-          sort,
-        },
-      });
-
-      const updatedLinks = _.map(feed.links, (feedLink) => {
-        if (feedLink.id === link.id) {
-          let votesClone = _.clone(feedLink.votes);
-          votesClone = _.union(vote.user.split(), votesClone);
-          return {
-            ...feedLink,
-            votes: votesClone,
-          };
-        }
-        return feedLink;
-      });
-
-      cache.writeQuery({
-        query: FEED_QUERY,
-        data: {
-          feed: {
-            links: updatedLinks,
+      if (search) {
+        const { feed } = cache.readQuery({
+          query: FEED_QUERY,
+          variables: {
+            limit,
+            skip,
+            sort,
           },
-        },
-        variables: {
-          limit,
-          skip,
-          sort,
-        },
-      });
+        });
+
+        const updatedLinks = _.map(feed.links, (feedLink) => {
+          if (feedLink.id === link.id) {
+            let votesClone = _.clone(feedLink.votes);
+            votesClone = _.union(vote.user.split(), votesClone);
+            return {
+              ...feedLink,
+              votes: votesClone,
+            };
+          }
+          return feedLink;
+        });
+
+        cache.writeQuery({
+          query: FEED_QUERY,
+          data: {
+            feed: {
+              links: updatedLinks,
+            },
+          },
+          variables: {
+            limit,
+            skip,
+            sort,
+          },
+        });
+      }
     },
     onError: ({ graphQLErrors, networkError }) => {
       if (graphQLErrors)

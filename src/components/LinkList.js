@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useQuery } from '@apollo/client';
 import { useHistory } from 'react-router';
 import _ from 'lodash';
@@ -7,6 +7,7 @@ import Link from './Link';
 import Loader from 'react-loader';
 import { FEED_QUERY } from '../constants/queries';
 import { LINKS_PER_PAGE } from '../constants';
+import PaginationContext from './pagination';
 import {
   NEW_LINKS_SUBSCRIPTION,
   NEW_VOTES_SUBSCRIPTION,
@@ -18,15 +19,14 @@ const LinkList = () => {
   const pageIndexParams = history.location.pathname.split('/');
   const page = parseInt(pageIndexParams[pageIndexParams.length - 1]);
   const pageIndex = page ? (page - 1) * LINKS_PER_PAGE : 0;
+  const { pagination, setPagination } = useContext(PaginationContext);
 
-  const getQueryVariables = (isNewPage, page) => {
-    const skip = isNewPage ? (page - 1) * LINKS_PER_PAGE : 0;
-    const limit = isNewPage ? LINKS_PER_PAGE : 100;
-    const sort = { createdAt: 'desc' };
-    return { limit, skip, sort };
-  };
   const { data, loading, error, subscribeToMore } = useQuery(FEED_QUERY, {
-    variables: getQueryVariables(isNewPage, page),
+    variables: {
+      skip: pagination.skip,
+      limit: pagination.limit,
+      sort: pagination.sort,
+    },
     fetchPolicy: 'network-only',
   });
 
@@ -77,24 +77,21 @@ const LinkList = () => {
     },
   });
 
-  const getLinksToRender = (isNewPage, data) => {
+  useEffect(() => {
     if (isNewPage) {
-      const { skip, limit, sort } = getQueryVariables(isNewPage, page);
-      return {
-        data: data.feed.links,
-        skip,
+      const { limit, sort } = pagination;
+      setPagination({
+        skip: (page - 1) * LINKS_PER_PAGE,
         limit,
         sort,
-      };
+      });
     }
-    const rankedLinks = data.feed.links.slice();
-    rankedLinks.sort((l1, l2) => l2.votes.length - l1.votes.length);
-    return {
-      data: rankedLinks,
-      skip: 0,
-      limit: 0,
-      sort: {},
-    };
+  }, [page]);
+
+  const getLinksToRender = (isNewPage, data) => {
+    if (isNewPage) {
+      return data.feed.links;
+    }
   };
 
   return (
@@ -103,15 +100,8 @@ const LinkList = () => {
       {error && <pre>{JSON.stringify(data?.error, null, 2)}</pre>}
       {data && (
         <>
-          {getLinksToRender(isNewPage, data).data.map((link, index) => (
-            <Link
-              key={link.id}
-              link={link}
-              index={index + pageIndex}
-              skip={getLinksToRender(isNewPage, data).skip}
-              limit={getLinksToRender(isNewPage, data).limit}
-              sort={getLinksToRender(isNewPage, data).sort}
-            />
+          {getLinksToRender(isNewPage, data).map((link, index) => (
+            <Link key={link.id} link={link} index={index + pageIndex} />
           ))}
           {isNewPage && (
             <div className="flex ml4 mv3 gray">
