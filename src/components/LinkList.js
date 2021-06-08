@@ -1,11 +1,16 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { useHistory } from 'react-router';
+import _ from 'lodash';
 
 import Link from './Link';
 import Loader from 'react-loader';
 import { FEED_QUERY } from '../constants/queries';
 import { LINKS_PER_PAGE } from '../constants';
+import {
+  NEW_LINKS_SUBSCRIPTION,
+  NEW_VOTES_SUBSCRIPTION,
+} from '../constants/subscription';
 
 const LinkList = () => {
   const history = useHistory();
@@ -20,9 +25,56 @@ const LinkList = () => {
     const sort = { createdAt: 'desc' };
     return { limit, skip, sort };
   };
-  const { data, loading, error } = useQuery(FEED_QUERY, {
+  const { data, loading, error, subscribeToMore } = useQuery(FEED_QUERY, {
     variables: getQueryVariables(isNewPage, page),
     fetchPolicy: 'network-only',
+  });
+
+  subscribeToMore({
+    document: NEW_LINKS_SUBSCRIPTION,
+    updateQuery: (prev, { subscriptionData }) => {
+      if (!subscriptionData.data) return prev;
+      const newLink = subscriptionData.data.newLink;
+      const exists = prev.feed.links.find(({ id }) => id === newLink.id);
+      if (exists) return prev;
+
+      return Object.assign({}, prev, {
+        feed: {
+          links: [newLink, ...prev.feed.links],
+          count: prev.feed.links.length + 1,
+          __typename: prev.feed.__typename,
+        },
+      });
+    },
+  });
+
+  subscribeToMore({
+    document: NEW_VOTES_SUBSCRIPTION,
+    updateQuery: (prev, { subscriptionData }) => {
+      if (!subscriptionData.data) return prev;
+
+      const updatedLinks = _.map(prev?.feed.links, (feedLink) => {
+        if (feedLink.id === subscriptionData?.data?.newVote?.link) {
+          let votesClone = _.clone(feedLink.votes);
+          votesClone = _.union(
+            subscriptionData?.data?.newVote?.user.split(),
+            votesClone
+          );
+          return {
+            ...feedLink,
+            votes: votesClone,
+          };
+        }
+        return feedLink;
+      });
+
+      return Object.assign({}, prev, {
+        feed: {
+          links: [...updatedLinks],
+          __typename: prev.feed.__typename,
+        },
+      });
+    },
   });
 
   const getLinksToRender = (isNewPage, data) => {
